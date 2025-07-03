@@ -33,14 +33,14 @@ for d in directories:
 	#file case
 	elif os.path.isfile(d) and d.endswith(".log"):
 		print(f"'Errors:' in {d}")
-		try:
-			with open(d, 'r') as log_file:
-				for line in log_file:
-					if "Errors:" in line:
-						ls = line.strip()
-						print(ls)
-		except Exception as e:
-			print(f"Issue with reading file: {e}")
+		#try:
+		#	with open(d, 'r') as log_file:
+		#		for line in log_file:
+		#			if "Errors:" in line:
+		#				ls = line.strip()
+		#				print(ls)
+		#except Exception as e:
+		#	print(f"Issue with reading file: {e}")
  
 
 
