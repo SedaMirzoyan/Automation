@@ -31,8 +31,8 @@ for d in directories:
 			print(f"Issue with reading directory: {e}")
  
 	#file case
-	elif os.path.isfile(d) and d.endswith(".log"):
-		print(f"'Errors:' in {d}")
+	elif os.path.isfile(d):
+		print(f"'{d} is file")
 		#try:
 		#	with open(d, 'r') as log_file:
 		#		for line in log_file:
