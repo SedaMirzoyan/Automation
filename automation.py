@@ -5,15 +5,24 @@ import os
 import csv
 import re
 
+
+qa_check_path = ""
 directories = glob.glob("*/*/compout/views/*")
 
-output_csv = "errors_report.csv"
 txt_file = "errors.txt"
-failed_insts = "failed_insts.txt"
-#search_pattern = re.search(r"\bErrors:\s*(?!0\b)\d+\b")
+output_csv = "errors_report.csv"
+output_html = "errors_report.html"
 
-data = []
-
+html = [
+    "<html><head><style>",
+    "table { border-collapse: collapse; width: 100%; }",
+    "th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }",
+    "th { background-color: #f2f2f2; }",
+    "</style></head><body>",
+    "<h2>Hello Messages</h2>",
+    "<table>",
+    "<tr><th>Instance name</th><th>Error message</th></tr>"
+]
 
 
 def findInstances():	
@@ -73,9 +82,7 @@ def writeIntoCsv():
 
 def writeIntoHtml():
 	try:
-		with open(txt_file, 'r') as log_file, open(output_csv, 'w') as csv_out:
-			writer = csv.writer(csv_out)
-			writer.writerow(["Instance name", "Error message", "Log path"])
+		with open(txt_file, 'r') as log_file:
 			for line in log_file:
 				parts = line.strip().split(":")
 				if re.search(r"\bErrors:\s*(?!0\b)\d+\b", line):
@@ -87,11 +94,18 @@ def writeIntoHtml():
 							with open(inst_path, 'r') as input_file:
 								for file_line in input_file:
 									if ("ERROR" in file_line):
-										writer.writerow([inst_name, file_line.strip(), inst_path])
+										message = file_line.strip().replace("<", "&lt;").replace(">", "&gt;")
+										html.append(f"<tr><td>{inst_name }</td><td>{message}</td></tr>")
 						except Exception as e:
 							print(f"Issue with writing in csv file: {e}")	
 	except Exception as ie:
 		print(f"Issue with reading a log file: {ie}")
+		
+		
+	html.extend(["</table>", "</body></html>"])
+	
+	with open(output_html, 'w') as out_html:
+		out_html.write("\n".join(html))
 
 
 	    
@@ -99,7 +113,7 @@ def writeIntoHtml():
     
 findInstances()
 writeIntoCsv()
-
+writeIntoHtml()
 
 	    
 	    
