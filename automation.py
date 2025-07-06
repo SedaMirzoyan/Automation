@@ -4,6 +4,7 @@ import glob
 import os
 import csv
 import re
+from collections import defaultdict
 
 
 qa_check_path = ""
@@ -13,6 +14,9 @@ txt_file = "errors.txt"
 output_csv = "errors_report.csv"
 output_html = "errors_report.html"
 
+data = defaultdict(list)
+
+
 html = [
     "<html><head><style>",
     "table { border-collapse: collapse; width: 100%; }",
@@ -21,7 +25,7 @@ html = [
     "</style></head><body>",
     "<h2>Hello Messages</h2>",
     "<table>",
-    "<tr><th>Instance name</th><th>Error message</th></tr>"
+    "<tr><th>Instance name</th><th>Error message</th><th>Log Path</th></tr>"
 ]
 
 
@@ -89,17 +93,25 @@ def writeIntoHtml():
 					print("Failed instance is {")
 					if(len(parts) >= 2):
 						inst_name = parts[0].strip()
+						inst_name = os.path.splitext(inst_name)[0]
 						inst_path = parts[1].strip()
 						try:
 							with open(inst_path, 'r') as input_file:
 								for file_line in input_file:
 									if ("ERROR" in file_line):
-										message = file_line.strip().replace("<", "&lt;").replace(">", "&gt;")
-										html.append(f"<tr><td>{inst_name }</td><td>{message}</td></tr>")
+										error_message = file_line.strip().replace("<", "&lt;").replace(">", "&gt;")
+										#html.append(f"<tr><td>{inst_name }</td><td>{error_message}</td><td>{inst_path}</td></tr>")
+										data[inst_name].append((error_message, inst_path))
 						except Exception as e:
 							print(f"Issue with writing in csv file: {e}")	
 	except Exception as ie:
 		print(f"Issue with reading a log file: {ie}")
+		
+		
+	for inst_name, inst_name_values in data.items():
+		for i,(error_message, inst_path) in enumerate(inst_name_values):
+			inst = inst_name if (i == 0) else ""
+			html.append(f"<tr><td>{inst}</td><td>{error_message}</td><td>{inst_path}</td></tr>")	
 		
 		
 	html.extend(["</table>", "</body></html>"])
