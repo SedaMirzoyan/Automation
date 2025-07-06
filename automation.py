@@ -108,12 +108,20 @@ def writeIntoHtml():
 		print(f"Issue with reading a log file: {ie}")
 		
 		
+		
 	for inst_name, inst_name_values in data.items():
-		for i,(error_message, inst_path) in enumerate(inst_name_values):
-			inst = inst_name if (i == 0) else ""
-			html.append(f"<tr><td>{inst}</td><td>{error_message}</td><td>{inst_path}</td></tr>")	
-		
-		
+		inst_name_values = [i for i in inst_name_values if i[0].strip() and i[1].strip()]
+		if (not inst_name_values):
+			continue
+				
+		rowspan = len(inst_name_values)
+		for j, (error_message, path) in enumerate(inst_name_values):
+			if j == 0:
+				html.append(f"<tr><td rowspan='{rowspan}'>{inst_name}</td><td>{error_message}</td><td>{inst_path}</td></tr>")
+			else:
+				html.append(f"<tr><td>{error_message}</td><td>{inst_path}</td></tr>")
+				
+						
 	html.extend(["</table>", "</body></html>"])
 	
 	with open(output_html, 'w') as out_html:
