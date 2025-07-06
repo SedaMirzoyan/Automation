@@ -35,43 +35,63 @@ def findInstances():
                                         	#txt.write(f"{instance} : {line.strip()}\n")
 											txt.write(f"{instance} : {full_path} : {line.strip()}\n")
 							except Exception as re:
-								print(f"Issue with reading file: {re}")
+								print(f"Issue with reading a file: {re}")
 						elif os.path.isfile(d):
 							print(f"{d} is file")
 	except Exception as we:
-		print(f"Issue with writing in file: {we}")
+		print(f"Issue with writing into a file: {we}")
 
 
 
 
 def writeIntoCsv():
 	try:
-		with open(txt_file, 'r') as log_file:
-
+		with open(txt_file, 'r') as log_file, open(output_csv, 'w') as csv_out:
+			writer = csv.writer(csv_out)
+			writer.writerow(["Instance name", "Error message", "Log path"])
 			for line in log_file:
-				parts = line.split(":")
+				parts = line.strip().split(":")
 				if re.search(r"\bErrors:\s*(?!0\b)\d+\b", line):
 					print("Failed instance is {")
 					if(len(parts) >= 2):
-						#inst_name = parts[0].strip()
-						inst_name = parts[0]
-						inst_path = parts[1]
+						inst_name = parts[0].strip()
+						inst_name = os.path.splitext(inst_name)[0]
+						inst_path = parts[1].strip()
 						try:
-							with open(output_csv, 'w') as csv_out:
-								writer = csv.writer(csv_out)
-								writer.writerow(["Instance name", "Error message"])
-								for file_line in log_file:
+							with open(inst_path, 'r') as input_file:
+								for file_line in input_file:
 									if ("ERROR" in file_line):
-										writer.writerow([inst_name, file_line.strip()])
+										writer.writerow([inst_name, file_line.strip(), inst_path])
 						except Exception as e:
 							print(f"Issue with writing in csv file: {e}")	
 	except Exception as ie:
-		print(f"Issue with reading log file: {ie}")
+		print(f"Issue with reading a log file: {ie}")
 
 
 
 
 
+def writeIntoHtml():
+	try:
+		with open(txt_file, 'r') as log_file, open(output_csv, 'w') as csv_out:
+			writer = csv.writer(csv_out)
+			writer.writerow(["Instance name", "Error message", "Log path"])
+			for line in log_file:
+				parts = line.strip().split(":")
+				if re.search(r"\bErrors:\s*(?!0\b)\d+\b", line):
+					print("Failed instance is {")
+					if(len(parts) >= 2):
+						inst_name = parts[0].strip()
+						inst_path = parts[1].strip()
+						try:
+							with open(inst_path, 'r') as input_file:
+								for file_line in input_file:
+									if ("ERROR" in file_line):
+										writer.writerow([inst_name, file_line.strip(), inst_path])
+						except Exception as e:
+							print(f"Issue with writing in csv file: {e}")	
+	except Exception as ie:
+		print(f"Issue with reading a log file: {ie}")
 
 
 	    
