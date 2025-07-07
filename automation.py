@@ -7,8 +7,12 @@ import re
 from collections import defaultdict
 
 
-qa_check_path = ""
-directories = glob.glob("*/*/compout/views/*")
+qa_check_path = "/remote/us01sgnfs00693/ss8/ss8-6428856/work/mirzoyan/qa/all"
+const_path = "/*/*/compout/views/*"
+
+full_path_pattern = qa_check_path + const_path
+directories = glob.glob(full_path_pattern)
+
 
 txt_file = "errors.txt"
 output_csv = "errors_report.csv"
