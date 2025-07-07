@@ -25,12 +25,38 @@ class RecordingStrategy(ABC):
     @abstractmethod
     def record(self, qa_check_path):
         pass
+		
+		
+#	def findInstances(self):	
+#		try:
+#			with open(txt_file, 'w') as txt:
+#				for d in directories:
+#					if os.path.isdir(d):
+#						print("for testing ", d)
+#						for file_name in os.listdir(d):
+#							full_path = os.path.join(d, file_name)
+#							if os.path.isfile(full_path) and file_name.endswith(".log"):
+#								try:
+#									with open(full_path, 'r') as log_file:
+#										for line in log_file:
+#											if "Errors:" in line:
+#												ls = line.strip()
+#												print(ls)
+#												instance = os.path.basename(full_path)
+#												txt.write(f"{instance} : {full_path} : {line.strip()}\n")
+#								except Exception as re:
+#									print(f"Issue with reading a file: {re}")
+#							elif os.path.isfile(d):
+#								print(f"{d} is file")
+#		except Exception as we:
+#			print(f"Issue with writing into a file: {we}")	
 
 
 
 class RecordingInCsvStrategy(RecordingStrategy):
 
 	def record(self, qa_check_path):
+		print("recording in csv")
 		output_csv = "errors_report.csv"
 		try:
 			with open(txt_file, 'r') as log_file, open(output_csv, 'w') as csv_out:
@@ -59,6 +85,7 @@ class RecordingInCsvStrategy(RecordingStrategy):
 class RecordingInHtmlStrategy(RecordingStrategy):
 
 	def record(self, qa_check_path):
+		print("recording in html")
 		data = defaultdict(list)
 		output_html = "errors_report.html"
 
@@ -71,7 +98,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
     		"<h2>Hello Messages</h2>",
     		"<table>",
     		"<tr><th>Instance name</th><th>Error message</th><th>Log Path</th></tr>"
-			]
+		]
 			
 		try:
 			with open(txt_file, 'r') as log_file:
@@ -95,7 +122,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 			print(f"Issue with reading a log file: {ie}")
 		
 		
-		#this part is only responsible for html formatting???????????????????
+		#this part is only responsible for html formatting
 		for inst_name, inst_name_values in data.items():
 			inst_name_values = [i for i in inst_name_values if i[0].strip() and i[1].strip()]
 			if (not inst_name_values):
@@ -130,36 +157,26 @@ class Recorder:
 		self.strategy = strategy
 			
 		
-	def findInstances(self):	
-		try:
-			with open(txt_file, 'w') as txt:
-				for d in directories:
-					if os.path.isdir(d):
-						print("for testing ", d)
-						for file_name in os.listdir(d):
-							full_path = os.path.join(d, file_name)
-							if os.path.isfile(full_path) and file_name.endswith(".log"):
-								try:
-									with open(full_path, 'r') as log_file:
-										for line in log_file:
-											if "Errors:" in line:
-												ls = line.strip()
-												print(ls)
-												instance = os.path.basename(full_path)
-												txt.write(f"{instance} : {full_path} : {line.strip()}\n")
-								except Exception as re:
-									print(f"Issue with reading a file: {re}")
-							elif os.path.isfile(d):
-								print(f"{d} is file")
-		except Exception as we:
-			print(f"Issue with writing into a file: {we}")	  
+  
 			
 			
 			
 	def record_data(self, qa_check_path):
 		return self.strategy.record(qa_check_path)
-    
+		
+		
+		
+class RecordingFactory:
 
+	def createStrategy(self, strategy_choice):
+		if(strategy_choice == "csv"):
+			return RecordingInCsvStrategy()
+		elif(strategy_choice == "html"):
+			return RecordingInHtmlStrategy()
+		else:
+			return ValueError("Unknown recording type")
+		
+    
 
 
 #please provide path for QA check, currently it is empty
@@ -168,21 +185,30 @@ qa_check_path = ""
 txt_file = "errors.txt"
 directories = makeDirectoryPath(qa_check_path)
 
+##Startegy design pattern
+#
+##create recorder with csv recording strategy	    
+#csv_strategy = RecordingInCsvStrategy()
+#csv_recorder = Recorder(csv_strategy)
+#
+##record data using the current strategy (Csv)
+#csv_recorded_data = csv_recorder.record_data(directories)
+#	    
+#
+##create recorder with html recording strategy	    
+#html_strategy = RecordingInHtmlStrategy()
+#html_recorder = Recorder(html_strategy)
+#
+##record data using the current strategy (Html)
+#html_recorded_data = html_recorder.record_data(directories)
 
-#create recorder with csv recording strategy	    
-csv_strategy = RecordingInCsvStrategy()
-csv_recorder = Recorder(csv_strategy)
 
-#record data using the current strategy (Csv)
-csv_recorded_data = csv_recorder.record_data(directories)
-	    
-
-#create recorder with html recording strategy	    
-html_strategy = RecordingInHtmlStrategy()
-html_recorder = Recorder(html_strategy)
-
-#record data using the current strategy (Html)
-html_recorded_data = html_recorder.record_data(directories)
+#Factory design pattern
 	   
- 
+strategy = RecordingFactory()
+csv_fact = strategy.createStrategy("csv")
+html_fact = strategy.createStrategy("html")
+
+csv_fact.record(qa_check_path)
+html_fact.record(qa_check_path)
 
