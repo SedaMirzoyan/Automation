@@ -18,6 +18,30 @@ def makeDirectoryPath(qa_check_path):
 
 
 
+def findInstances(txt_file):	
+	try:
+		with open(txt_file, 'w') as txt:
+			for d in directories:
+				if os.path.isdir(d):
+					for file_name in os.listdir(d):
+						full_path = os.path.join(d, file_name)
+						if os.path.isfile(full_path) and file_name.endswith(".log"):
+							try:
+								with open(full_path, 'r') as log_file:
+									for line in log_file:
+										if "Errors:" in line:
+											ls = line.strip()
+											instance = os.path.basename(full_path)
+											txt.write(f"{instance} : {full_path} : {line.strip()}\n")
+							except Exception as re:
+								print(f"Issue with reading a file: {re}")
+						elif os.path.isfile(d):
+							print(f"{d} is file")
+	except Exception as we:
+		print(f"Issue with writing into a file: {we}")	
+
+
+
 class RecordingStrategy(ABC):
     """
     Abstract base class with recording strategies
@@ -27,30 +51,6 @@ class RecordingStrategy(ABC):
         pass
 		
 		
-#	def findInstances(self):	
-#		try:
-#			with open(txt_file, 'w') as txt:
-#				for d in directories:
-#					if os.path.isdir(d):
-#						print("for testing ", d)
-#						for file_name in os.listdir(d):
-#							full_path = os.path.join(d, file_name)
-#							if os.path.isfile(full_path) and file_name.endswith(".log"):
-#								try:
-#									with open(full_path, 'r') as log_file:
-#										for line in log_file:
-#											if "Errors:" in line:
-#												ls = line.strip()
-#												print(ls)
-#												instance = os.path.basename(full_path)
-#												txt.write(f"{instance} : {full_path} : {line.strip()}\n")
-#								except Exception as re:
-#									print(f"Issue with reading a file: {re}")
-#							elif os.path.isfile(d):
-#								print(f"{d} is file")
-#		except Exception as we:
-#			print(f"Issue with writing into a file: {we}")	
-
 
 
 class RecordingInCsvStrategy(RecordingStrategy):
@@ -156,15 +156,12 @@ class Recorder:
 
 		self.strategy = strategy
 			
-		
-  
-			
-			
-			
+						
 	def record_data(self, qa_check_path):
 		return self.strategy.record(qa_check_path)
 		
 		
+
 		
 class RecordingFactory:
 
@@ -176,6 +173,26 @@ class RecordingFactory:
 		else:
 			return ValueError("Unknown recording type")
 		
+
+
+class Command(ABC):
+	"""
+    Abstract base class with execute abstract method
+    """
+    @abstractmethod
+    def execute(self, qa_check_path):
+        pass
+		
+	
+		
+class CommandRecordCsvStrategy(Command):
+	#def __init__(self):
+		
+		
+	def execute(self):
+		pass
+		
+			
     
 
 
@@ -184,23 +201,24 @@ qa_check_path = ""
 
 txt_file = "errors.txt"
 directories = makeDirectoryPath(qa_check_path)
+findInstances(txt_file)
 
-##Startegy design pattern
-#
-##create recorder with csv recording strategy	    
-#csv_strategy = RecordingInCsvStrategy()
-#csv_recorder = Recorder(csv_strategy)
-#
-##record data using the current strategy (Csv)
-#csv_recorded_data = csv_recorder.record_data(directories)
-#	    
-#
-##create recorder with html recording strategy	    
-#html_strategy = RecordingInHtmlStrategy()
-#html_recorder = Recorder(html_strategy)
-#
-##record data using the current strategy (Html)
-#html_recorded_data = html_recorder.record_data(directories)
+#Startegy design pattern
+
+#create recorder with csv recording strategy	    
+csv_strategy = RecordingInCsvStrategy()
+csv_recorder = Recorder(csv_strategy)
+
+#record data using the current strategy (Csv)
+csv_recorded_data = csv_recorder.record_data(directories)
+	    
+
+#create recorder with html recording strategy	    
+html_strategy = RecordingInHtmlStrategy()
+html_recorder = Recorder(html_strategy)
+
+#record data using the current strategy (Html)
+html_recorded_data = html_recorder.record_data(directories)
 
 
 #Factory design pattern
