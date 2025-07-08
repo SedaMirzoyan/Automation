@@ -3,4 +3,4 @@ Please find code structure below:
 
     *) Function which builds absolute path for log file
     *) Function which finds log files, redirects instance name, log path and number of errors into text file
-    *) Implement two strategies for recording - one with the help of csv and other with html srategy
+    *) Implement two strategies for recording - one with the help of csv and other with html strategy
