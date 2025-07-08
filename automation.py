@@ -164,7 +164,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 		
 		
 		"""
-		this part is responsible for html formatting, for one instance there can be multiple error messages, it helps format that part
+		this part is responsible for html formatting, for one instance there can be multiple error messages, it helps format that section
 		"""
 		
 		for inst_name, inst_name_values in data.items():
@@ -253,7 +253,7 @@ class RecordingAutomation:
 
 
 #please provide path for QA check, currently it is empty
-qa_check_path = ""
+qa_check_path = "/remote/us01sgnfs00693/ss8/ss8-6428856/work/mirzoyan/qa/all"
 
 txt_file = "errors.txt"
 directories = makeDirectoryPath(qa_check_path)
