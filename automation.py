@@ -253,7 +253,7 @@ class RecordingAutomation:
 
 
 #please provide path for QA check, currently it is empty
-qa_check_path = "/remote/us01sgnfs00693/ss8/ss8-6428856/work/mirzoyan/qa/all"
+qa_check_path = ""
 
 txt_file = "errors.txt"
 directories = makeDirectoryPath(qa_check_path)
