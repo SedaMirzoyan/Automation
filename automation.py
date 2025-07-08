@@ -42,6 +42,7 @@ def findInstances(txt_file):
 
 
 
+#Strategy
 class RecordingStrategy(ABC):
     """
     Abstract base class with recording strategies
@@ -56,7 +57,7 @@ class RecordingStrategy(ABC):
 class RecordingInCsvStrategy(RecordingStrategy):
 
 	def record(self, qa_check_path):
-		print("recording in csv")
+		print("calling recording in csv method")
 		output_csv = "errors_report.csv"
 		try:
 			with open(txt_file, 'r') as log_file, open(output_csv, 'w') as csv_out:
@@ -85,7 +86,7 @@ class RecordingInCsvStrategy(RecordingStrategy):
 class RecordingInHtmlStrategy(RecordingStrategy):
 
 	def record(self, qa_check_path):
-		print("recording in html")
+		print("calling recording in html method")
 		data = defaultdict(list)
 		output_html = "errors_report.html"
 
@@ -143,7 +144,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 
 
 	    
-	  
+#Factory	  
 class Recorder:
 	 		
 	def __init__(self, strategy):
@@ -175,25 +176,15 @@ class RecordingFactory:
 		
 
 
-class Command(ABC):
-	"""
-    Abstract base class with execute abstract method
-    """
-    @abstractmethod
-    def execute(self, qa_check_path):
-        pass
-		
-	
-		
-class CommandRecordCsvStrategy(Command):
-	#def __init__(self):
-		
-		
-	def execute(self):
-		pass
-		
-			
+#Template
+class RecordingAutomation:
+	def template_method(self, csv_obj, html_obj, qa_check_path):
+		#print("calling template method")
+		csv_method = csv_obj.record(qa_check_path)
+		html_method = html_obj.record(qa_check_path)
+
     
+
 
 
 #please provide path for QA check, currently it is empty
@@ -204,7 +195,6 @@ directories = makeDirectoryPath(qa_check_path)
 findInstances(txt_file)
 
 #Startegy design pattern
-
 #create recorder with csv recording strategy	    
 csv_strategy = RecordingInCsvStrategy()
 csv_recorder = Recorder(csv_strategy)
@@ -221,12 +211,16 @@ html_recorder = Recorder(html_strategy)
 html_recorded_data = html_recorder.record_data(directories)
 
 
-#Factory design pattern
-	   
+#Factory design pattern	   
 strategy = RecordingFactory()
 csv_fact = strategy.createStrategy("csv")
 html_fact = strategy.createStrategy("html")
 
 csv_fact.record(qa_check_path)
 html_fact.record(qa_check_path)
+
+
+#Template design pattern
+automation = RecordingAutomation()
+automation.template_method(csv_fact, html_fact, qa_check_path)
 
