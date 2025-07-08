@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 
 
 #Builds absolute path with qa_check_path(provided by user) and const_path variables
-def makeDirectoryPath(qa_check_path):
+def buildDirectoryPath(qa_check_path):
 	#below variable has always the same structure for all QA checks
 	const_path = "/*/*/compout/views/*"
 	
@@ -164,7 +164,8 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 		
 		
 		"""
-		this part is responsible for html formatting, for one instance there can be multiple error messages, it helps format that section
+		this part is responsible for html formatting, for one instance there can be multiple error messages,
+		it helps 
 		"""
 		
 		for inst_name, inst_name_values in data.items():
@@ -256,7 +257,7 @@ class RecordingAutomation:
 qa_check_path = ""
 
 txt_file = "errors.txt"
-directories = makeDirectoryPath(qa_check_path)
+directories = buildDirectoryPath(qa_check_path)
 findInstances(txt_file)
 
 #Startegy design pattern
