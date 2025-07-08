@@ -77,7 +77,7 @@ class RecordingInCsvStrategy(RecordingStrategy):
 		"""
 		*) Open csv file for writing and txt for reading
 		*) Search if number of errors is not equal to 0 ("Errors:")
-		*) Take till second ":" symbol, means take instance name (currently it is log file name) and log path
+		*) Take till second ":" symbol, which are instance name (currently it is log file name) and log path
 		*) Find actual error message (""ERROR")
 		*) Write instance name, error message, instance path in csv file
 		"""
@@ -137,7 +137,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 		"""
 		*) Open txt file for reading
 		*) Search if number of errors is not equal to 0 ("Errors:")
-		*) Take till second ":" symbol, means take instance name (currently it is log file name) and log path
+		*) Take till second ":" symbol, which are instance name (currently it is log file name) and log path
 		*) Find actual error message (""ERROR")
 		"""
 			
@@ -259,7 +259,7 @@ txt_file = "errors.txt"
 directories = buildDirectoryPath(qa_check_path)
 findInstances(txt_file)
 
-#Startegy design pattern
+#Strategy design pattern
 #create recorder with csv recording strategy	    
 csv_strategy = RecordingInCsvStrategy()
 csv_recorder = Recorder(csv_strategy)
