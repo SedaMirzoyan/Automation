@@ -9,8 +9,11 @@ from abc import ABC, abstractmethod
 
 
 
+#Builds absolute path with qa_check_path(provided by user) and const_path variables
 def makeDirectoryPath(qa_check_path):
+	#below variable has always the same structure for all QA checks
 	const_path = "/*/*/compout/views/*"
+	
 	full_path_pattern = qa_check_path + const_path
 	directories = glob.glob(full_path_pattern)	
 	
@@ -18,6 +21,7 @@ def makeDirectoryPath(qa_check_path):
 
 
 
+#This method finds log files, redirects instance name, log path, number of errors ("Errors:") into txt file
 def findInstances(txt_file):	
 	try:
 		with open(txt_file, 'w') as txt:
@@ -32,7 +36,7 @@ def findInstances(txt_file):
 										if "Errors:" in line:
 											ls = line.strip()
 											instance = os.path.basename(full_path)
-											txt.write(f"{instance} : {full_path} : {line.strip()}\n")
+											txt.write(f"{instance} : {full_path} : {ls}\n")
 							except Exception as re:
 								print(f"Issue with reading a file: {re}")
 						elif os.path.isfile(d):
@@ -55,10 +59,28 @@ class RecordingStrategy(ABC):
 
 
 class RecordingInCsvStrategy(RecordingStrategy):
+	"""
+	Strategy for recording, using csv 
+	"""
 
 	def record(self, qa_check_path):
+		"""
+		Records using csv
+
+		Args:
+    		qa_check_path (string): path, provided by user 
+		"""
 		print("calling recording in csv method")
 		output_csv = "errors_report.csv"
+		
+		
+		"""
+		*) Open csv file for writing and txt for reading
+		*) Search if number of errors is not equal to 0 ("Errors:")
+		*) Take till second ":" symbol, means take instance name (currently it is log file name) and log path
+		*) Find actual error message (""ERROR")
+		*) Write instance name, error message, instance path in csv file
+		"""
 		try:
 			with open(txt_file, 'r') as log_file, open(output_csv, 'w') as csv_out:
 				writer = csv.writer(csv_out)
@@ -68,7 +90,10 @@ class RecordingInCsvStrategy(RecordingStrategy):
 					if re.search(r"\bErrors:\s*(?!0\b)\d+\b", line):
 						if(len(parts) >= 2):
 							inst_name = parts[0].strip()
+							
+							#"inst_name" is log file name, remove ".log" extension, keep only actual instance name
 							inst_name = os.path.splitext(inst_name)[0]
+							
 							inst_path = parts[1].strip()
 							try:
 								with open(inst_path, 'r') as input_file:
@@ -84,8 +109,16 @@ class RecordingInCsvStrategy(RecordingStrategy):
 
 
 class RecordingInHtmlStrategy(RecordingStrategy):
-
+	"""
+	Strategy for recording, using html 
+	"""
 	def record(self, qa_check_path):
+		"""
+		Records using html
+
+		Args:
+			qa_check_path (string): path, provided by user 
+		"""
 		print("calling recording in html method")
 		data = defaultdict(list)
 		output_html = "errors_report.html"
@@ -100,6 +133,13 @@ class RecordingInHtmlStrategy(RecordingStrategy):
     		"<table>",
     		"<tr><th>Instance name</th><th>Error message</th><th>Log Path</th></tr>"
 		]
+		
+		"""
+		*) Open txt file for reading
+		*) Search if number of errors is not equal to 0 ("Errors:")
+		*) Take till second ":" symbol, means take instance name (currently it is log file name) and log path
+		*) Find actual error message (""ERROR")
+		"""
 			
 		try:
 			with open(txt_file, 'r') as log_file:
@@ -123,7 +163,11 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 			print(f"Issue with reading a log file: {ie}")
 		
 		
-		#this part is only responsible for html formatting
+		"""
+		this part is responsible for html formatting, for one instance there can be multiple error messages,
+		it helps 
+		"""
+		
 		for inst_name, inst_name_values in data.items():
 			inst_name_values = [i for i in inst_name_values if i[0].strip() and i[1].strip()]
 			if (not inst_name_values):
@@ -136,17 +180,18 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 				else:
 					html.append(f"<tr><td>{error_message}</td><td>{inst_path}</td></tr>")
 				
-						
+		
+		#*) Write instance name, error message, instance path in html file				
 		html.extend(["</table>", "</body></html>"])
-	
 		with open(output_html, 'w') as out_html:
 			out_html.write("\n".join(html))
 
 
-	    
-#Factory	  
+	    	  
 class Recorder:
-	 		
+	"""
+	Class which uses recording strategy
+	"""	 		
 	def __init__(self, strategy):
 		"""
 		Initialize with a recording strategy
@@ -159,14 +204,32 @@ class Recorder:
 			
 						
 	def record_data(self, qa_check_path):
+		"""
+		Records using current strategy
+
+		Args:
+			qa_check_path (string): path, provided by user 
+		"""
+
 		return self.strategy.record(qa_check_path)
 		
 		
 
-		
+#Factory		
 class RecordingFactory:
-
+	"""
+	Factory class to create strategy objects
+	"""
 	def createStrategy(self, strategy_choice):
+		"""
+		Create strategy based on the provided type
+
+		Args:
+			strategy_choice (string): type of a strategy
+			
+		Return:
+			An object of an html or csv
+		"""
 		if(strategy_choice == "csv"):
 			return RecordingInCsvStrategy()
 		elif(strategy_choice == "html"):
@@ -178,8 +241,11 @@ class RecordingFactory:
 
 #Template
 class RecordingAutomation:
+	"""
+	Template class to call recording methods
+	"""
 	def template_method(self, csv_obj, html_obj, qa_check_path):
-		#print("calling template method")
+		#records with csv and html methods
 		csv_method = csv_obj.record(qa_check_path)
 		html_method = html_obj.record(qa_check_path)
 
@@ -199,7 +265,7 @@ findInstances(txt_file)
 csv_strategy = RecordingInCsvStrategy()
 csv_recorder = Recorder(csv_strategy)
 
-#record data using the current strategy (Csv)
+#record data using csv strategy 
 csv_recorded_data = csv_recorder.record_data(directories)
 	    
 
@@ -207,7 +273,7 @@ csv_recorded_data = csv_recorder.record_data(directories)
 html_strategy = RecordingInHtmlStrategy()
 html_recorder = Recorder(html_strategy)
 
-#record data using the current strategy (Html)
+#record data using html strategy 
 html_recorded_data = html_recorder.record_data(directories)
 
 
