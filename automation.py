@@ -164,7 +164,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 		
 		
 		"""
-		this part is responsible for html formatting, for one instance there can be multiple error messages, it helps format that section
+		this part is responsible for html formatting, for one instance there can be multiple error messages, it helps  format that section
 		"""
 		
 		for inst_name, inst_name_values in data.items():
