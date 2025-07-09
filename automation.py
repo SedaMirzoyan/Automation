@@ -4,9 +4,9 @@ import glob
 import os
 import csv
 import re
+import sys
 from collections import defaultdict
 from abc import ABC, abstractmethod
-
 
 
 #Builds absolute path with qa_check_path(provided by user) and const_path variables
@@ -163,10 +163,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 			print(f"Issue with reading a log file: {ie}")
 		
 		
-		"""
-		this part is responsible for html formatting, for one instance there can be multiple error messages, it helps  format that section
-		"""
-		
+		#this part is responsible for html formatting, for one instance there can be multiple error messages, it helps  format that section		
 		for inst_name, inst_name_values in data.items():
 			inst_name_values = [i for i in inst_name_values if i[0].strip() and i[1].strip()]
 			if (not inst_name_values):
@@ -252,8 +249,8 @@ class RecordingAutomation:
 
 
 
-#please provide path for QA check, currently it is empty
-qa_check_path = ""
+#print("Please provide path for QA check : ")
+qa_check_path = sys.argv[1]
 
 txt_file = "errors.txt"
 directories = buildDirectoryPath(qa_check_path)
