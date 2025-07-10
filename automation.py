@@ -129,7 +129,6 @@ class RecordingInHtmlStrategy(RecordingStrategy):
     		"th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }",
     		"th { background-color: #f2f2f2; }",
     		"</style></head><body>",
-    		"<h2>Hello Messages</h2>",
     		"<table>",
     		"<tr><th>Instance name</th><th>Error message</th><th>Log Path</th></tr>"
 		]
