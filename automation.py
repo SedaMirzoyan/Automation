@@ -88,20 +88,19 @@ class RecordingInCsvStrategy(RecordingStrategy):
 				for line in log_file:
 					parts = line.strip().split(":")
 					if re.search(r"\bErrors:\s*(?!0\b)\d+\b", line):
-						if(len(parts) >= 2):
-							inst_name = parts[0].strip()
-							
-							#"inst_name" is log file name, remove ".log" extension, keep only actual instance name
-							inst_name = os.path.splitext(inst_name)[0]
-							
-							inst_path = parts[1].strip()
-							try:
-								with open(inst_path, 'r') as input_file:
-									for file_line in input_file:
-										if ("ERROR" in file_line):
-											writer.writerow([inst_name, file_line.strip(), inst_path])
-							except Exception as e:
-								print(f"Issue with writing in csv file: {e}")	
+						inst_name = parts[0].strip()
+													
+						#"inst_name" is log file name, remove ".log" extension, keep only actual instance name
+						inst_name = os.path.splitext(inst_name)[0]
+						
+						inst_path = parts[1].strip()
+						try:
+							with open(inst_path, 'r') as input_file:
+								for file_line in input_file:
+									if ("ERROR" in file_line):
+										writer.writerow([inst_name, file_line.strip(), inst_path])
+						except Exception as e:
+							print(f"Issue with writing in csv file: {e}")	
 		except Exception as ie:
 			print(f"Issue with reading a log file: {ie}")
 
@@ -145,19 +144,18 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 				for line in log_file:
 					parts = line.strip().split(":")
 					if re.search(r"\bErrors:\s*(?!0\b)\d+\b", line):
-						if(len(parts) >= 2):
-							inst_name = parts[0].strip()
-							inst_name = os.path.splitext(inst_name)[0]
-							inst_path = parts[1].strip()
-							try:
-								with open(inst_path, 'r') as input_file:
-									for file_line in input_file:
-										if ("ERROR" in file_line):
-											error_message = file_line.strip().replace("<", "&lt;").replace(">", "&gt;")
-											#html.append(f"<tr><td>{inst_name }</td><td>{error_message}</td><td>{inst_path}</td></tr>")
-											data[inst_name].append((error_message, inst_path))
-							except Exception as e:
-								print(f"Issue with writing in csv file: {e}")	
+						inst_name = parts[0].strip()
+						inst_name = os.path.splitext(inst_name)[0]
+						inst_path = parts[1].strip()
+						try:
+							with open(inst_path, 'r') as input_file:
+								for file_line in input_file:
+									if ("ERROR" in file_line):
+										error_message = file_line.strip().replace("<", "&lt;").replace(">", "&gt;")
+										#html.append(f"<tr><td>{inst_name }</td><td>{error_message}</td><td>{inst_path}</td></tr>")
+										data[inst_name].append((error_message, inst_path))
+						except Exception as e:
+							print(f"Issue with writing in csv file: {e}")	
 		except Exception as ie:
 			print(f"Issue with reading a log file: {ie}")
 		
