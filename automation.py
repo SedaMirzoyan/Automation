@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 
 
 
-def buildDirectoryPath(qa_check_path):
+def build_directory_path(qa_check_path):
 	"""
 	Builds absolute path with qa_check_path(provided by user) and const_path variables
 	"""
@@ -25,7 +25,7 @@ def buildDirectoryPath(qa_check_path):
 
 
 
-def findInstances(txt_file, directories):	
+def find_instances(txt_file, directories):	
 	"""
 	This method finds log files, redirects instance name, log path, number of errors ("Errors:") into txt file
 	"""
@@ -220,7 +220,7 @@ class RecordingFactory:
 	"""
 	Factory class to create strategy objects
 	"""
-	def createStrategy(self, strategy_choice):
+	def create_strategy(self, strategy_choice):
 		"""
 		Create strategy based on the provided type
 
@@ -257,8 +257,8 @@ def main():
 	qa_check_path = sys.argv[1]
 
 	txt_file = "errors.txt"
-	directories = buildDirectoryPath(qa_check_path)
-	findInstances(txt_file, directories)
+	directories = build_directory_path(qa_check_path)
+	find_instances(txt_file, directories)
 
 	#Strategy design pattern
 	#create recorder with csv recording strategy	    
@@ -279,8 +279,8 @@ def main():
 
 	#Factory design pattern	   
 	strategy = RecordingFactory()
-	csv_fact = strategy.createStrategy("csv")
-	html_fact = strategy.createStrategy("html")
+	csv_fact = strategy.create_strategy("csv")
+	html_fact = strategy.create_strategy("html")
 
 	csv_fact.record(txt_file)
 	html_fact.record(txt_file)
