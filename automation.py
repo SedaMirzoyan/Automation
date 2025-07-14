@@ -9,8 +9,12 @@ from collections import defaultdict
 from abc import ABC, abstractmethod
 
 
-#Builds absolute path with qa_check_path(provided by user) and const_path variables
+
 def buildDirectoryPath(qa_check_path):
+	"""
+	Builds absolute path with qa_check_path(provided by user) and const_path variables
+	"""
+	
 	#below variable has always the same structure for all QA checks
 	const_path = "/*/*/compout/views/*"
 	
@@ -21,8 +25,10 @@ def buildDirectoryPath(qa_check_path):
 
 
 
-#This method finds log files, redirects instance name, log path, number of errors ("Errors:") into txt file
-def findInstances(txt_file):	
+def findInstances(txt_file, directories):	
+	"""
+	This method finds log files, redirects instance name, log path, number of errors ("Errors:") into txt file
+	"""
 	try:
 		with open(txt_file, 'w') as txt:
 			for d in directories:
@@ -52,7 +58,7 @@ class RecordingStrategy(ABC):
     Abstract base class with recording strategies
     """
     @abstractmethod
-    def record(self, qa_check_path):
+    def record(self, txt_file):
         pass
 		
 		
@@ -63,7 +69,7 @@ class RecordingInCsvStrategy(RecordingStrategy):
 	Strategy for recording, using csv 
 	"""
 
-	def record(self, qa_check_path):
+	def record(self, txt_file):
 		"""
 		Records using csv
 
@@ -111,7 +117,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 	"""
 	Strategy for recording, using html 
 	"""
-	def record(self, qa_check_path):
+	def record(self, txt_file):
 		"""
 		Records using html
 
@@ -153,7 +159,8 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 									if ("ERROR" in file_line):
 										error_message = file_line.strip().replace("<", "&lt;").replace(">", "&gt;")
 										#html.append(f"<tr><td>{inst_name }</td><td>{error_message}</td><td>{inst_path}</td></tr>")
-										data[inst_name].append((error_message, inst_path))
+										if((error_message, inst_path) not in data[inst_name]):
+											data[inst_name].append((error_message, inst_path))
 						except Exception as e:
 							print(f"Issue with writing in csv file: {e}")	
 		except Exception as ie:
@@ -166,10 +173,10 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 			if (not inst_name_values):
 				continue
 				
-			rowspan = len(inst_name_values)
+			rowspan_len = len(inst_name_values)
 			for j, (error_message, path) in enumerate(inst_name_values):
 				if j == 0:
-					html.append(f"<tr><td rowspan='{rowspan}'>{inst_name}</td><td>{error_message}</td><td>{inst_path}</td></tr>")
+					html.append(f"<tr><td rowspan='{rowspan_len}'>{inst_name}</td><td>{error_message}</td><td>{inst_path}</td></tr>")
 				else:
 					html.append(f"<tr><td>{error_message}</td><td>{inst_path}</td></tr>")
 				
@@ -237,22 +244,21 @@ class RecordingAutomation:
 	"""
 	Template class to call recording methods
 	"""
-	def template_method(self, csv_obj, html_obj, qa_check_path):
+	def template_method(self, csv_obj, html_obj, txt_file):
 		#records with csv and html methods
-		csv_method = csv_obj.record(qa_check_path)
-		html_method = html_obj.record(qa_check_path)
+		csv_method = csv_obj.record(txt_file)
+		html_method = html_obj.record(txt_file)
 
     
 
 
 
-
-if __name__== "__main__":
+def main():
 	qa_check_path = sys.argv[1]
 
 	txt_file = "errors.txt"
 	directories = buildDirectoryPath(qa_check_path)
-	findInstances(txt_file)
+	findInstances(txt_file, directories)
 
 	#Strategy design pattern
 	#create recorder with csv recording strategy	    
@@ -276,13 +282,22 @@ if __name__== "__main__":
 	csv_fact = strategy.createStrategy("csv")
 	html_fact = strategy.createStrategy("html")
 
-	csv_fact.record(qa_check_path)
-	html_fact.record(qa_check_path)
+	csv_fact.record(txt_file)
+	html_fact.record(txt_file)
 
 
 	#Template design pattern
 	automation = RecordingAutomation()
-	automation.template_method(csv_fact, html_fact, qa_check_path)
+	automation.template_method(csv_fact, html_fact, txt_file)
+	
+	try:
+		os.remove(txt_file)
+		print(f"File '{txt_file}' was deleted successfully.")
+	except FileNotFoundError:
+		print(f"File '{txt_file}' not found.")
+	except Exception as e:
+		print(f"An error occurred: {e}")
 	
 	
-	
+if __name__== "__main__":
+	main()	
