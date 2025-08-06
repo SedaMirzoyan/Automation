@@ -11,13 +11,14 @@ def main():
 	qa_check_path = sys.argv[1]
 	logger = functional.add_logging()
 	"""
-	Create simple data container, think of it as a "manual mini module"
+	Create simple data container, like "manual mini module"
 	"""
 	context = SimpleNamespace()
 
-	txt_file = "errors.txt"
+	#txt_file = "errors.txt"
+	error_data = {}
 	directories = functional.build_directory_path(qa_check_path)
-	functional.find_instances(txt_file, directories)
+	functional.find_instances(error_data, directories)
 
 	"""
 	Strategy design pattern: Create recorder with csv recording strategy	
@@ -28,7 +29,7 @@ def main():
 	"""
 	Record data using csv strategy 
 	"""
-	csv_recorded_data = csv_recorder.record_data(txt_file, logger)
+	csv_recorded_data = csv_recorder.record_data(error_data, logger)
 	    
 
 	#create recorder with html recording strategy	    
@@ -36,7 +37,7 @@ def main():
 	html_recorder = automation.Recorder(html_strategy)
 
 	#record data using html strategy 
-	html_recorded_data = html_recorder.record_data(txt_file, logger)
+	html_recorded_data = html_recorder.record_data(error_data, logger)
 
 
 	#Factory design pattern	   
@@ -44,23 +45,15 @@ def main():
 	csv_fact = strategy.create_strategy("csv", module_name=context)
 	html_fact = strategy.create_strategy("html", module_name=context)
 
-	csv_fact.record(txt_file, logger)
-	html_fact.record(txt_file, logger)
+	csv_fact.record(error_data, logger)
+	html_fact.record(error_data, logger)
 
 
 	#Template design pattern
 	tpl_method = automation.RecordingAutomation()
-	tpl_method.template_method(csv_fact, html_fact, txt_file, logger)
+	tpl_method.template_method(csv_fact, html_fact, error_data, logger)
 	
 	
-	
-#	try:
-#		os.remove(txt_file)
-#		print(f"File '{txt_file}' was deleted successfully.")
-#	except FileNotFoundError:
-#		print(f"File '{txt_file}' not found.")
-#	except Exception as e:
-#		print(f"An error occurred: {e}")
 	
 	
 if __name__== "__main__":

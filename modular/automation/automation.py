@@ -1,6 +1,7 @@
 import os
 import csv
 import re
+from itertools import groupby
 from collections import defaultdict
 from abc import ABC, abstractmethod
 
@@ -12,10 +13,8 @@ class RecordingStrategy(ABC):
     Abstract base class with recording strategies
     """
     @abstractmethod
-    def record(self, txt_file):
+    def record(self, error_data):
         pass
-		
-		
 
 
 class RecordingInCsvStrategy(RecordingStrategy):
@@ -30,7 +29,7 @@ class RecordingInCsvStrategy(RecordingStrategy):
 	def __init__(self, module_name):
 		self.module_name = module_name
 
-	def record(self, txt_file, logger):
+	def record(self, error_data, logger):
 		"""
 		Records using csv
 
@@ -49,32 +48,25 @@ class RecordingInCsvStrategy(RecordingStrategy):
 		*) Write instance name, error message, instance path in csv file
 		"""
 		try:
-			with open(txt_file, 'r') as log_file, open(output_csv, 'w') as csv_out:
+			with open(output_csv, 'w') as csv_out:
 				writer = csv.writer(csv_out)
 				writer.writerow(["Instance name", "Error message", "Log path"])
-				for line in log_file:
-					parts = line.strip().split(":")
-					if re.search(r"\bErrors:\s*(?!0\b)\d+\b", line):
-						inst_name = parts[0].strip()
-													
-						#"inst_name" is log file name, remove ".log" extension, keep only actual instance name
-						inst_name = os.path.splitext(inst_name)[0]
-						
-						inst_path = parts[1].strip()
-						try:
-							with open(inst_path, 'r') as input_file:
-								for file_line in input_file:
-									if ("ERROR" in file_line):
-										writer.writerow([inst_name, file_line.strip(), inst_path])
-						except FileNotFoundError:
-							logging.error(f"File not found: {inst_path}")
-						except Exception as e:
-							logging.error(f"Issue with writing in csv file: {e}")	
+				for inst_name, path_and_count in error_data.items():
+					for file_path, error_count in path_and_count:
+						match = re.search(r"Errors:\s*(\d+)", error_count)
+						if match and int(match.group(1)) != 0:
+							inst_name = os.path.basename(file_path)
+							try:
+								with open(file_path, 'r') as input_file:
+									for file_line in input_file:
+										if ("ERROR" in file_line):
+											writer.writerow([inst_name, file_line.strip(), file_path])
+							except FileNotFoundError:
+								logging.error(f"File not found: {file_path}")	
 		except Exception as ie:
-			logging.error(f"Issue with reading a log file: {ie}")
+			logging.error(f"Issue with writing in csv file: {ie}")
 
-
-
+			
 
 class RecordingInHtmlStrategy(RecordingStrategy):
 	"""
@@ -85,7 +77,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 		self.module_name = module_name
 	
 	
-	def record(self, txt_file, logger):
+	def record(self, error_data, logger):
 		"""
 		Records using html
 
@@ -95,9 +87,8 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 		logger.info("Calling recording in html method")
 		data = defaultdict(list)
 		output_html = "errors_report.html"
-		seen = set()
 
-		html = [
+		html_parts = [
     		"<html><head><style>",
     		"table { border-collapse: collapse; width: 100%; }",
     		"th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }",
@@ -113,61 +104,72 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 		*) Take till second ":" symbol, which are instance name (currently it is log file name) and log path
 		*) Find actual error message ("ERROR")
 		"""
+		
 			
-		try:
-			with open(txt_file, 'r') as log_file:
-				for line in log_file:
-					parts = line.strip().split(":")
-					if re.search(r"\bErrors:\s*(?!0\b)\d+\b", line):
-						inst_name = parts[0].strip()
-						inst_name = os.path.splitext(inst_name)[0]
-						inst_path = parts[1].strip()
-						try:
-							with open(inst_path, 'r') as input_file:
-								for file_line in input_file:
-									if ("ERROR" in file_line):
-										error_message = file_line.strip().replace("<", "&lt;").replace(">", "&gt;")
-										report_components = (inst_name, error_message, inst_path)
-										#html.append(f"<tr><td>{inst_name }</td><td>{error_message}</td><td>{inst_path}</td></tr>")
-										#if(report_components not in seen):
-										data[inst_name].append((error_message, inst_path))
-										#	seen.add(report_components)
-						except FileNotFoundError:
-							logging.error(f"File not found: {inst_path}")
-						except Exception as e:
-							logging.error(f"Issue with writing in csv file: {e}")	
-		except Exception as ie:
-			logging.error(f"Issue with reading a log file: {ie}")
+		for inst_name, path_and_count in error_data.items():
+			for file_path, error_count in path_and_count:
+				parts = file_path.strip().split(":")
+				match = re.search(r"Errors:\s*(\d+)", error_count)
+				if match and int(match.group(1)) != 0:
+					inst_name = os.path.basename(file_path)
+											
+					#"inst_name" is log file name, remove ".log" extension, keep only actual instance name
+					inst_name = os.path.splitext(inst_name)[0]
+					try:
+						with open(file_path, 'r') as input_file:
+							for file_line in input_file:
+								if ("ERROR" in file_line):
+									error_message = file_line.strip().replace("<", "&lt;").replace(">", "&gt;")
+									report_components = (inst_name, error_message, file_path)
+									#html.append(f"<tr><td>{inst_name }</td><td>{error_message}</td><td>{inst_path}</td></tr>")
+									#if(report_components not in seen):
+									data[inst_name].append((error_message, file_path))
+									print("data itemsssssssssss ", data.keys(), data.values())
+					except FileNotFoundError:
+						logging.error(f"File not found: {file_path}")
+							
+		
 		
 		
 		#this part is responsible for html formatting, for one instance there can be multiple error messages, it helps  format that section		
-#		for inst_name, inst_name_values in data.items():
-#			inst_name_values = [i for i in inst_name_values if i[0].strip() and i[1].strip()]
-#			if (not inst_name_values):
-#				continue
-#				
-#			rowspan_len = len(inst_name_values)
-#			for j, (error_message, path) in enumerate(inst_name_values):
-#				if j == 0:
-#					html.append(f"<tr><td rowspan='{rowspan_len}'>{inst_name}</td><td>{error_message}</td><td>{inst_path}</td></tr>")
-#				else:
-#					html.append(f"<tr><td>{error_message}</td><td>{inst_path}</td></tr>")
+		for key, values in data.items():
+			total_rows = len(values)  # Count how many rows this key will span in the table
+			first_column_written = False  # Tracks whether we've written the key cell (column 1)
 
+			# Sort the list of tuples by the first element to use groupby correctly
+			sorted_values = sorted(values, key=lambda x: x[0])
 
-		for inst_name, inst_name_values in data.items():
-			#inst_name_values = [i for i in inst_name_values if i[0].strip() and i[1].strip()]
-			if (not inst_name_values):
-				continue
-				
-			for j, (error_message, path) in enumerate(inst_name_values):
-				inst_name_report = inst_name if j == 0 else ""
-				html.append(f"<tr><td>{inst_name_report}</td><td>{error_message}</td><td>{inst_path}</td></tr>")
-				
+			# Group the sorted list by the first element of the tuple (e.g., "B", "E")
+			for first, group in groupby(sorted_values, key=lambda x: x[0]):
+				group_list = list(group)            # Convert the group iterator to a list
+				rowspan_first = len(group_list)     # Number of rows the first column cell should span
+
+				# Now write each row for this group
+				for i, (_, second) in enumerate(group_list):
+					row = "<tr>"  # Start an HTML table row
+
+					# Only write the main key ("A") once with correct rowspan
+					if not first_column_written:
+						row += f"<td rowspan='{total_rows}'>{key}</td>"
+						first_column_written = True  # Mark that we've written the key cell
+
+					# Only write the first column (e.g., "B", "E") on the first row of the group
+					if i == 0:
+						row += f"<td rowspan='{rowspan_first}'>{first}</td>"
+
+					# Always write the second column (e.g., "C", "D", "F")
+					row += f"<td>{second}</td></tr>"
+
+					# Add the completed row to the list
+					html_parts.append(row)
+
 		
-		#*) Write instance name, error message, instance path in html file				
-		html.extend(["</table>", "</body></html>"])
+		html_parts.append("</table>")
+		html_parts.append("</body>")
+		html_parts.append("</html>")
+		
 		with open(output_html, 'w') as out_html:
-			out_html.write("\n".join(html))
+			out_html.write("\n".join(html_parts))
 
 
 	    	  
