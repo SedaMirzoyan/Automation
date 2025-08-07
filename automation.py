@@ -220,27 +220,17 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 		
 		
 		#this part is responsible for html formatting, for one instance there can be multiple error messages, it helps  format that section		
-#		for inst_name, inst_name_values in data.items():
-#			inst_name_values = [i for i in inst_name_values if i[0].strip() and i[1].strip()]
-#			if (not inst_name_values):
-#				continue
-#				
-#			rowspan_len = len(inst_name_values)
-#			for j, (error_message, path) in enumerate(inst_name_values):
-#				if j == 0:
-#					html.append(f"<tr><td rowspan='{rowspan_len}'>{inst_name}</td><td>{error_message}</td><td>{inst_path}</td></tr>")
-#				else:
-#					html.append(f"<tr><td>{error_message}</td><td>{inst_path}</td></tr>")
-
-
 		for inst_name, inst_name_values in data.items():
-			#inst_name_values = [i for i in inst_name_values if i[0].strip() and i[1].strip()]
+			inst_name_values = [i for i in inst_name_values if i[0].strip() and i[1].strip()]
 			if (not inst_name_values):
 				continue
 				
+			rowspan_len = len(inst_name_values)
 			for j, (error_message, path) in enumerate(inst_name_values):
-				inst_name_report = inst_name if j == 0 else ""
-				html.append(f"<tr><td>{inst_name_report}</td><td>{error_message}</td><td>{inst_path}</td></tr>")
+				if j == 0:
+					html.append(f"<tr><td rowspan='{rowspan_len}'>{inst_name}</td><td>{error_message}</td><td>{inst_path}</td></tr>")
+				else:
+					html.append(f"<tr><td>{error_message}</td><td>{inst_path}</td></tr>")
 				
 		
 		#*) Write instance name, error message, instance path in html file				
@@ -270,7 +260,7 @@ class Recorder:
 		Records using current strategy
 
 		Args:
-			qa_check_path (string): path, provided by user 
+			qa_check_path (string): path, provided by user
 		"""
 
 		return self.strategy.record(txt_file, logger)
