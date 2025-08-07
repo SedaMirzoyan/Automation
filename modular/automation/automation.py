@@ -77,7 +77,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 		self.module_name = module_name
 	
 	
-	def record(self, error_data, logger):
+	def core(self, error_data, logger):
 		"""
 		Records using html
 
@@ -86,26 +86,14 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 		"""
 		logger.info("Calling recording in html method")
 		data = defaultdict(list)
-		output_html = "errors_report.html"
-
-		html_parts = [
-    		"<html><head><style>",
-    		"table { border-collapse: collapse; width: 100%; }",
-    		"th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }",
-    		"th { background-color: #f2f2f2; }",
-    		"</style></head><body>",
-    		"<table>",
-    		"<tr><th>Instance name</th><th>Error message</th><th>Log Path</th></tr>"
-		]
 		
 		"""
 		*) Open txt file for reading
 		*) Search if number of errors is not equal to 0 ("Errors:")
 		*) Take till second ":" symbol, which are instance name (currently it is log file name) and log path
 		*) Find actual error message ("ERROR")
-		"""
-		
-			
+		"""	
+				
 		for inst_name, path_and_count in error_data.items():
 			for file_path, error_count in path_and_count:
 				parts = file_path.strip().split(":")
@@ -126,11 +114,27 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 									data[inst_name].append((error_message, file_path))
 									print("data itemsssssssssss ", data.keys(), data.values())
 					except FileNotFoundError:
-						logging.error(f"File not found: {file_path}")
+						logging.error(f"File not found: {file_path}")						
+						
+		return data
 							
 		
 		
-		
+	def record(self, error_data, logger):
+	
+		output_html = "errors_report.html"
+		data = self.core(error_data, logger)
+
+		html_parts = [
+    		"<html><head><style>",
+    		"table { border-collapse: collapse; width: 100%; }",
+    		"th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }",
+    		"th { background-color: #f2f2f2; }",
+    		"</style></head><body>",
+    		"<table>",
+    		"<tr><th>Instance name</th><th>Error message</th><th>Log Path</th></tr>"
+		]
+			
 		#this part is responsible for html formatting, for one instance there can be multiple error messages, it helps  format that section		
 		for key, values in data.items():
 			total_rows = len(values)  # Count how many rows this key will span in the table

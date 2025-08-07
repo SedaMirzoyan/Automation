@@ -3,13 +3,29 @@
 import sys
 import functional 
 import automation 
+from pathlib import Path
 from types import SimpleNamespace
 
 
 
 def main():
-	qa_check_path = sys.argv[1]
 	logger = functional.add_logging()
+	
+	if(len(sys.argv) < 2):
+		print("Error: Directory path argument is missing")
+		return
+
+	#qa_check_path = sys.argv[1]
+	qa_check_path = Path(sys.argv[1])
+	
+	if not qa_check_path.exists():
+		print("Error: Path does not exist")
+		return
+	
+	if not qa_check_path.is_dir():
+		print("Error: Path is not a directory")
+		return
+			
 	"""
 	Create simple data container, like "manual mini module"
 	"""

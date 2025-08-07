@@ -39,18 +39,21 @@ def add_logging():
 
 
 
-def build_directory_path(qa_check_path):
+def build_directory_path(user_path):
 	"""
 	Builds absolute path with qa_check_path(provided by user) and const_path variables
 	
 	Args:
-		qa_check_path (string): path, provided by user
+		user_path (string): path, provided by user
 	Return:
 		directories (list): absolute path		
 	"""
 	
 	#below variable has always the same structure for all QA checks
 	const_path = "/*/*/c/v/*"
+	
+	#convert posix path to string
+	qa_check_path = str(user_path)
 	
 	full_path_pattern = qa_check_path + const_path
 	directories = glob.glob(full_path_pattern)	
