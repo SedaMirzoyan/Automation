@@ -1,6 +1,7 @@
 import os
 import csv
 import re
+import html
 from itertools import groupby
 from collections import defaultdict
 from abc import ABC, abstractmethod
@@ -76,6 +77,15 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 	def __init__(self, module_name):
 		self.module_name = module_name
 	
+
+	def _add_error(self, data, inst_name, error_message, file_path):
+		inst_name = html.escape(inst_name)
+		error_message = html.escape(error_message)
+		file_path = html.escape(file_path)
+		if inst_name not in data:
+			data[inst_name] = []
+		data[inst_name].append((error_message, file_path))
+
 	
 	def core(self, error_data, logger):
 		"""
@@ -114,10 +124,16 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 									data[inst_name].append((error_message, file_path))
 									print("data itemsssssssssss ", data.keys(), data.values())
 					except FileNotFoundError:
-						logging.error(f"File not found: {file_path}")						
+						logging.error(f"File not found: {file_path}")	
+						
+		self._add_error(data, inst_name, error_message, file_path)
+					
 						
 		return data
 							
+
+
+
 		
 		
 	def record(self, error_data, logger):
@@ -134,6 +150,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
     		"<table>",
     		"<tr><th>Instance name</th><th>Error message</th><th>Log Path</th></tr>"
 		]
+		
 			
 		#this part is responsible for html formatting, for one instance there can be multiple error messages, it helps  format that section		
 		for key, values in data.items():
