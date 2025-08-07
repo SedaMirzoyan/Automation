@@ -56,44 +56,12 @@ def build_directory_path(qa_check_path):
 	"""
 	
 	#below variable has always the same structure for all QA checks
-	const_path = "/*/*/compout/views/*"
+	const_path = "/*/*/c/v/*"
 	
 	full_path_pattern = qa_check_path + const_path
 	directories = glob.glob(full_path_pattern)	
 	
 	return directories
-
-
-
-#def find_instances(txt_file, directories):	
-#	"""
-#	This method finds log files, redirects instance name, log path, number of errors ("Errors:") into txt file
-#	
-#	Args:
-#		directories (list): absolute path
-#		txt_file (file): ???????????????????????????????????? change comment
-#	"""
-#	try:
-#		with open(txt_file, 'w') as txt:
-#			for d in directories:
-#				if os.path.isdir(d):
-#					for file_name in os.listdir(d):
-#						full_path = os.path.join(d, file_name)
-#						if os.path.isfile(full_path) and file_name.endswith(".log"):
-#							try:
-#								with open(full_path, 'r') as log_file:
-#									for line in log_file:
-#										if "Errors:" in line:
-#											ls = line.strip()
-#											instance = os.path.basename(full_path)
-#											txt.write(f"{instance} : {full_path} : {ls}\n")
-#							except Exception as re:
-#								print(f"Issue with reading a file: {re}")
-#						elif os.path.isfile(d):
-#							print(f"{d} is file")
-#	except Exception as we:
-#		print(f"Issue with writing into a file: {we}")	
-#	print("txt_file ", type(txt_file))
 
 
 def find_instances(txt_file, directories):	
@@ -102,7 +70,7 @@ def find_instances(txt_file, directories):
 	
 	Args:
 		directories (list): absolute path
-		txt_file (file): ???????????????????????????????????? change comment
+		txt_file (file): input txt file, with error info
 	"""
 	try:
 		with open(txt_file, 'w') as txt:
@@ -151,7 +119,7 @@ class RecordingInCsvStrategy(RecordingStrategy):
 		Records using csv
 
 		Args:
-    		txt_file (string): path, provided by user ?????????????????????????????????????????? change comment
+    		txt_file (string): input txt file, with error info
 		"""
 		logger.info("Calling recording in csv method")
 		output_csv = "errors_report.csv"
@@ -201,7 +169,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 		Records using html
 
 		Args:
-			qa_check_path (string): path, provided by user ????????????????????????????????????? change comment
+			qa_check_path (string): path, provided by user
 		"""
 		logger.info("Calling recording in html method")
 		data = defaultdict(list)
@@ -340,9 +308,7 @@ class RecordingAutomation:
 	"""
 	def template_method(self, csv_obj, html_obj, txt_file, logger):
 		"""
-		Method records with csv and html methods
-		???????????????????????????????????????????????????????????????? change comment
-		
+		Method records with csv and html methods		
 		"""
 		csv_method = csv_obj.record(txt_file, logger)
 		html_method = html_obj.record(txt_file, logger)
@@ -391,13 +357,13 @@ def main():
 	
 	
 	
-#	try:
-#		os.remove(txt_file)
-#		print(f"File '{txt_file}' was deleted successfully.")
-#	except FileNotFoundError:
-#		print(f"File '{txt_file}' not found.")
-#	except Exception as e:
-#		print(f"An error occurred: {e}")
+	try:
+		os.remove(txt_file)
+		print(f"File '{txt_file}' was deleted successfully.")
+	except FileNotFoundError:
+		print(f"File '{txt_file}' not found.")
+	except Exception as e:
+		print(f"An error occurred: {e}")
 	
 	
 if __name__== "__main__":
