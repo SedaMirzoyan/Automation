@@ -2,6 +2,7 @@ import glob
 import os
 import re
 import logging
+from collections import defaultdict
 
 
 def add_logging():
@@ -19,7 +20,7 @@ def add_logging():
 	logger.setLevel(logging.INFO)
 	
 	"""
-	Log messages into report.log file with overwrite mode.
+	Logging messages into "report.log" file with overwrite mode.
 	File format is level name: message.
 	"""
 
@@ -28,7 +29,7 @@ def add_logging():
 	logger.addHandler(file_name)
 	
 	"""
-	Log messages to the terminal, with the same format as in log file.
+	Logging messages to the terminal, with the same format as in log file.
 	
 	"""
 	console_handler = logging.StreamHandler()
@@ -49,28 +50,49 @@ def build_directory_path(user_path):
 		directories (list): absolute path		
 	"""
 	
-	#below variable has always the same structure for all QA checks
+	"""
+	Below variable has always the same structure for all QA checks
+	"""
 	const_path = "/*/*/c/v/*"
 	
-	#convert posix path to string
-	qa_check_path = str(user_path)
 	
+	"""
+	Convert posix path to string
+	"""
+	qa_check_path = str(user_path)
+	qa_check_path = qa_check_path.rstrip('/')
+	
+	"""
+	Build the full pattern, absolute path
+	"""
 	full_path_pattern = qa_check_path + const_path
 	directories = glob.glob(full_path_pattern)	
 	
+		
 	return directories
 
 
 
-def find_instances(error_data, directories):	
+def create_error_data(directories):
 	"""
 	This method finds log files, redirects instance name, log path, number of errors ("Errors:") into txt file
 	
 	Args:
 		directories (list): absolute path
-		txt_file (file): ???????????????????????????????????? change comment
+		
+	Return:
+		error_data (dictionary): log file name, absolute path and count of error messages.
 	"""
-
+	error_data = defaultdict(list)
+	
+	
+	"""
+	*) Iterates over directories list, joined filename to absolute path for making complete log file name
+	*) Opens log file, finds line with "Errors" 
+	*) Adds log file name, absolute path and line with errors into dictionary
+	*) Code is checking for log file's read permission and ignores files in absolute path
+	"""
+	
 	for d in directories:
 		if os.path.isdir(d):
 			for file_name in os.listdir(d):
@@ -88,10 +110,8 @@ def find_instances(error_data, directories):
 						logging.error(f"Issue with reading a file: {re}")
 				elif os.path.isfile(d):
 					logging.info(f"{d} is file")
-
-
-
-
-
+						
+	return error_data
+					
 
 
