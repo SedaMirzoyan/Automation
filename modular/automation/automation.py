@@ -167,7 +167,7 @@ class RecordingInHtmlStrategy(RecordingStrategy):
 					except FileNotFoundError:
 						logging.error(f"File not found: {file_path}")	
 						
-		self._add_error(self.error_data, inst_name, error_message, file_path)			
+		#self._add_error(self.error_data, inst_name, error_message, file_path)			
 						 
 		return data
 							
